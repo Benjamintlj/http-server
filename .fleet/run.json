@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "run",
+            "type": "command",
+            "program": "build/main",
+            "dependsOn": ["build"],
+        },
+        {
+            "type": "command",
+            "name": "build",
+            "program": "gcc",
+            "args": ["-o", "build/main", "main.c"],
+        }
+    ]
+}
