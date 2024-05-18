@@ -2,7 +2,8 @@
 
 if [[ $1 == "server" ]]; then
   echo "running the server..."
-  ./server/build/main
+  cd ./server
+  ./build/main
 elif [[ $1 == "client" ]]; then
   echo "running the client..."
   ./client/build/main

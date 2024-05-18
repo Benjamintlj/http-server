@@ -8,6 +8,37 @@
 
 #define PORT 8080
 
+/// @brief fills buffer with file contents
+/// @param filename name of file
+/// @param buff allocated memory
+/// @param buffer_size size of allocated memory
+/// @return 0 for success, -1 for failure
+int get_file(const char* filename, char* buff, size_t buffer_size) {
+    FILE *file;
+    size_t i = 0;
+    int character;
+
+    file = fopen(filename, "r");
+    if (file == NULL) {
+        perror("cannot open file");
+        return -1;
+    }
+
+    while ((character = fgetc(file)) != EOF && i < buffer_size - 1) {
+        buff[i++] = (char)character;
+    }
+    buff[i] = '\0';
+
+    if (ferror(file)) {
+        perror("something went wrong while reading the file");
+        return -1;
+    }
+
+    fclose(file);
+    return 0;
+}
+
+
 /*
     struct sockaddr_in {
     __uint8_t       sin_len;
@@ -17,7 +48,6 @@
     char            sin_zero[8];
     };
 */
-
 int main(){
     // 1. create the socket
     const int address_family = AF_INET;     // means we are going to use IP, since we are building on TCP
@@ -64,16 +94,48 @@ int main(){
 
         // 4. send and recieve messages
         char buffer[1024] = {0};
-        printf("%s\n", buffer);
 
         if (read(other_sockets, buffer, sizeof(buffer)) < 0) {
             printf("nothing to be sent\n");
         }
 
-        char *msg = "this is the server speaking, can you hear me?";
-        write(other_sockets, msg, strlen(msg));
+        /**
+         * 1. create a html file (ben)
+         * 2. read that file into a buffer or char array (ben)
+         * 3. run strlen() on it, to get num of bytes
+         * 4. read the first line to get location
+         * 5. gen response
+         * 6. pass that back with correct response code (200 & 400, ignore 500s)
+        */
+        char* split = strtok(buffer, "\r\n");
+        char* split_again = strtok(split, " ");
+        char* file_to_get = strtok(NULL, " ");
+        file_to_get[strlen(file_to_get)] = '\0';
+        const char* foldername = "views";
+        char* file_path = (char*)malloc(strlen(foldername) + strlen(file_to_get) + 1);
+        sprintf(file_path, "%s%s", foldername, file_to_get);
+        
+        printf("Getting file %s\n", file_path);
 
-        printf("message sent\n");
+        size_t buffer_size = 2048;
+        char buff[buffer_size];
+
+        if(get_file(file_path, buff, buffer_size) == 0) {
+            printf("200\n");
+            char response[4096];
+
+            int content_length = strlen(buff);
+            char *init_header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
+
+            sprintf(response, "%s%d\r\n\r\n%s", init_header, content_length, buff);
+            write(other_sockets, response, strlen(response));
+
+            printf("message sent\n");
+        } else {
+            printf("404\n");
+            char *response = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
+            write(other_sockets, response, strlen(response));
+        }
 
         close(other_sockets);
     }
