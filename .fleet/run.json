@@ -1,16 +1,28 @@
 {
     "configurations": [
         {
-            "name": "run",
+            "name": "run server",
             "type": "command",
-            "program": "build/main",
-            "dependsOn": ["build"],
+            "program": "server/build/main",
+            "dependsOn": ["build server"],
         },
         {
             "type": "command",
-            "name": "build",
+            "name": "build server",
             "program": "gcc",
-            "args": ["-o", "build/main", "main.c"],
-        }
+            "args": ["-o", "server/build/main", "server/main.c"],
+        },
+        {
+            "name": "run client",
+            "type": "command",
+            "program": "client/build/main",
+            "dependsOn": ["build client"],
+        },
+        {
+            "type": "command",
+            "name": "build client",
+            "program": "gcc",
+            "args": ["-o", "client/build/main", "client/main.c"],
+        },
     ]
 }
