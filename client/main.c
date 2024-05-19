@@ -1,3 +1,14 @@
+/**
+* @file main.c
+* @brief This mini-project uses UNIX based TCP sockets to make a request to a HTTP server.
+* @author Ben Lewis-Jones, Lewis Heath
+* @version 1.0
+* @date 2024-05-19
+*/
+
+/////////////////////////////////////////////////////////////
+// Includes
+/////////////////////////////////////////////////////////////
 #include <stdio.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -8,8 +19,22 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+/////////////////////////////////////////////////////////////
+// Definitions
+/////////////////////////////////////////////////////////////
 #define PORT 8080
 
+/////////////////////////////////////////////////////////////
+// Method Headers
+/////////////////////////////////////////////////////////////
+
+/// @brief Creates a TCP socket, and makes an instat request to a localhost HTTP server.
+/// @return int Return status of the main function
+int main();
+
+/////////////////////////////////////////////////////////////
+// Method Definitions
+/////////////////////////////////////////////////////////////
 int main(){
     int socket_file_descripter, conn_file_descripter;
     struct sockaddr_in server_addr;
@@ -35,12 +60,12 @@ int main(){
         exit(EXIT_FAILURE);
     }
 
-    char* msg = "hello server";
+    char* msg = "GET /index.html HTTP/1.1\r\n\r\n";
     send(socket_file_descripter, msg, strlen(msg), 0);
     printf("sent\n");
     
-    char buffer[1024] = {0};
-    long response = read(socket_file_descripter, buffer, 1024);
+    char buffer[4096] = {0};
+    long response = read(socket_file_descripter, buffer, 4096);
     printf("%s\n", buffer);
 
     return 0;
